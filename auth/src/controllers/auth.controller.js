@@ -174,13 +174,13 @@ export const addUseraddress = async (req, res) => {
     const { state, street, city, pincode, country, phone, isDefault } = req.body;
 
 
-    //  // If new address is default → unset previous defaults
-    // if (isDefault === true) {
-    //   await userModel.updateOne(
-    //    { _id: id },
-    //     { $set: { "addresses.$[].isDefault": false } }
-    //   );
-    // }
+     // If new address is default → unset previous defaults
+    if (isDefault === true) {
+      await userModel.updateOne(
+       { _id: id },
+        { $set: { "addresses.$[].isDefault": false } }
+      );
+    }
 
     const user = await userModel.findByIdAndUpdate({ _id: id },
 
