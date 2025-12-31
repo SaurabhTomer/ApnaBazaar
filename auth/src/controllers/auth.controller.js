@@ -53,7 +53,8 @@ export const registerUser = async (req, res) => {
     //save token in cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
+       secure: false,     // 👈 MUST be false in localhost
+  sameSite: "lax", 
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
@@ -100,7 +101,8 @@ export const loginUser = async (req, res) => {
 
                res.cookie('token', token, {
             httpOnly: true,
-            secure: true,
+            secure: false,     // 👈 MUST be false in localhost
+  sameSite: "lax", 
             maxAge: 24 * 60 * 60 * 1000,
         });
 
@@ -130,8 +132,10 @@ export const getCurrentUser = async (req,res) => {
 }
 
 export const logoutUser = async (req , res) => {
+  // console.log('hello');
     try {
-        const token = req.cookie.token;
+        const token = req.cookies.token;
+        console.log(token);
 
         if(token){
             //expire in 1 day
@@ -146,7 +150,7 @@ export const logoutUser = async (req , res) => {
          return res.status(200).json({
             message: 'Logout successfully',
         });
-    } catch (error) {
+    } catch (err) {
         console.error('Error in logout:', err);
         return res.status(500).json({ message: 'Internal server error' });   
     }
