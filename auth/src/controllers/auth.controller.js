@@ -130,28 +130,37 @@ export const getCurrentUser = async (req,res) => {
     user:req.user
   });
 }
+export const logoutUser = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    console.log(token);
 
-export const logoutUser = async (req , res) => {
-  // console.log('hello');
-    try {
-        const token = req.cookies.token;
-        console.log(token);
-
-        if(token){
-            //expire in 1 day
-            await redis.set(`blacklist:${token}` , 'true' , 'EX' ,24 * 60 *60 )
-        }
-
-        res.clearCookie('token' , {
-          httpOnly:true,
-          secure:true,
-        })
-
-         return res.status(200).json({
-            message: 'Logout successfully',
-        });
-    } catch (err) {
-        console.error('Error in logout:', err);
-        return res.status(500).json({ message: 'Internal server error' });   
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
-}
+
+    // ✅ STEP 1: Add token to Redis blacklist (SET)
+    await redis.set(
+      `blacklist:${token}`,
+      "true",
+      "EX",
+      24 * 60 * 60 // 1 day
+    );
+
+    
+    // ✅ STEP 2: Clear cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: false,       // true only in production (HTTPS)
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({
+      message: "Logout successfully",
+    });
+
+  } catch (err) {
+    console.error("Error in logout:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
