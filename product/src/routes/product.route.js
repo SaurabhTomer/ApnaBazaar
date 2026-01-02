@@ -2,7 +2,7 @@ import express from 'express'
 import { createAuthMiddleware } from '../middlewares/auth.middleware.js';
 import multer from 'multer';
 import { createProductValidators } from './../validators/product.validator.js';
-import { createProduct } from '../controllers/product.controller.js';
+import { createProduct, getproductById, getProducts } from '../controllers/product.controller.js';
 
 const productRouter = express.Router();
 
@@ -16,5 +16,12 @@ productRouter.post(
     createProductValidators,
     createProduct
 );
+
+//GET
+productRouter.get('/' , createAuthMiddleware(['user']), getProducts)
+
+
+//GET
+productRouter.get('/:id' , createAuthMiddleware(['user']), getproductById)
 
 export default productRouter;

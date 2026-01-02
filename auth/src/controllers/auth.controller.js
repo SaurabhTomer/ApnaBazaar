@@ -149,6 +149,7 @@ export const logoutUser = async (req, res) => {
       24 * 60 * 60 // 1 day
     );
 
+ 
 
     //  Clear cookie
     res.clearCookie("token", {
