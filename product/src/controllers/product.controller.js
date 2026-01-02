@@ -1,4 +1,5 @@
 
+import mongoose from 'mongoose';
 import { uploadImage } from '../services/imagekit.service.js';
 import productModel from './../models/product.model.js';
 
@@ -62,7 +63,7 @@ export const getProducts = async (req, res) => {
     // Apply minimum price filter
     if (minprice) {
       filters["price.amount"] =
-       {
+      {
         ...filters["price.amount"],
         $gte: Number(minprice),
       };
@@ -71,7 +72,7 @@ export const getProducts = async (req, res) => {
     // Apply maximum price filter
     if (maxprice) {
       filters["price.amount"] =
-       {
+      {
         ...filters["price.amount"],
         $lte: Number(maxprice),
       };
@@ -81,7 +82,7 @@ export const getProducts = async (req, res) => {
     const products = await productModel
       .find(filters)
       .skip(Number(skip))
-      .limit(Math.min(Number(limit) , 20 ));
+      .limit(Math.min(Number(limit), 20));
 
     // Send products as response
     return res.status(200).json({
@@ -117,10 +118,104 @@ export const getproductById = async (req, res) => {
     });
 
   } catch (error) {
- 
+
     console.error("Get product by ID error:", error);
     return res.status(500).json({
       message: "Internal server error",
     });
   }
 };
+
+
+export const updateProduct = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid product id' });
+    }
+
+    // Find product
+    const product = await productModel.findOne({
+      _id: id
+    })
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    //find product that this seller has this product
+    if (product.seller.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden : You can only update your products' });
+    }
+
+    // Fields allowed to be updated
+    const allowedUpdates = ['title', 'description', 'price'];
+
+    for (const key of Object.keys(req.body)) {
+
+      if (allowedUpdates.includes(key)) {
+
+        if (key == 'price' && typeof req.body.price == 'object') {
+          if (req.body.price.amount !== undefined) {
+            product.price.amount = Number(req.body.price.amount);
+          }
+
+          if (req.body.price.currency !== undefined) {
+            product.price.currency = req.body.price.currency;
+          }
+        } else {
+          product[key] = req.body[key];
+        }
+      }
+    }
+
+
+
+    //save product
+    await product.save();
+    return res.status(200).json({ message: 'Product updated', data: product });
+
+  } catch (error) {
+
+    console.error("Get product by ID error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid product id' });
+    }
+
+
+    // Find product
+    const product = await productModel.findOne({
+      _id: id
+    })
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    //find product that this seller has this product
+    if (product.seller.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden : You can only delete your products' });
+    }
+
+    await productModel.findOneAndDelete( { _id : id });
+    return res.status(200).json({ message: 'Product deleted' });
+
+  } catch (error) {
+    console.error(" delete product error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
