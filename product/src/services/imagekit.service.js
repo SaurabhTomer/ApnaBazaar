@@ -1,6 +1,11 @@
+
+import dotenv from 'dotenv'
+dotenv.config()
+
 import ImageKit from "imagekit";
 import { v4 as uuidv4 } from "uuid";
 
+// console.log(process.env.IMAGEKIT_PRIVATE_KEY,process.env.IMAGEKIT_PUBLIC_KEY);
 
 const imagekit = new ImageKit({
   publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "test_public",
@@ -9,7 +14,6 @@ const imagekit = new ImageKit({
   process.env.IMAGEKIT_URL_ENDPOINT || "https://ik.imagekit.io/demo",
 });
 
-// console.log(process.env.IMAGEKIT_PRIVATE_KEY,process.env.IMAGEKIT_PUBLIC_KEY);
 
 export async function uploadImage({ buffer, folder = "/products" }) {
   const res = await imagekit.upload({
