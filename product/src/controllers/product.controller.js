@@ -209,11 +209,30 @@ export const deleteProduct = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden : You can only delete your products' });
     }
 
-    await productModel.findOneAndDelete( { _id : id });
+    await productModel.findOneAndDelete({ _id: id });
     return res.status(200).json({ message: 'Product deleted' });
 
   } catch (error) {
     console.error(" delete product error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+}
+
+
+export const getProductsBySeller = async (req, res) => {
+  try {
+    const seller = req.user;
+
+    const { skip = 0, limit = 20 } = req.query;
+
+    const products = await productModel.find({ seller: seller.id }).skip(skip).limit(Math.min(limit, 20));
+
+    return res.status(200).json({ data: products });
+
+  } catch (error) {
+    console.error(" get seller products  error:", error);
     return res.status(500).json({
       message: "Internal server error",
     });
