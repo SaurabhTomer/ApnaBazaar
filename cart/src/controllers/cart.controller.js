@@ -1,6 +1,32 @@
 import cartModel from "../models/cart.model.js";
 
 
+export const getCart = async (req, res) => {
+    try {
+        //fetch user
+        const userId = req.user.id;
+
+        // find cart of this user
+        const cart = await cartModel.findOne({
+            user: userId
+        });
+
+        //if cart not found then craete one and save
+        if (!cart) {
+            cart = new cartModel({ user: userId, items: [] })
+            await cart.save();
+        }
+        return res.status(200).json({ cart });
+
+    } catch (error) {
+        console.error("get  cart error:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+}
+
+
 export const addItemToCart = async (req, res) => {
     try {
         const { productId, quantity = 1 } = req.body;
@@ -54,35 +80,117 @@ export const addItemToCart = async (req, res) => {
     }
 }
 
-export const updateItemToCart = async (req,res) => {
+export const updateItemToCart = async (req, res) => {
     try {
         //id from param
-        const {productId} = req.params;
+        const { productId } = req.params;
         //quantity from body
-        const {quantity} = req.body;
+        const { quantity } = req.body;
 
         const userId = req.user.id;
 
         //check cart exist not
-        let cart = await cartModel.findById({user:userId});
-        if( !cart ){
-            return res.status(404).json({message:"Cart not found"});
+        let cart = await cartModel.findById({ user: userId });
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
         }
 
         //check if item present in cart or not 
-       const existingCart =  cart.items.findIndex( item => item.productId.toString() === productId)
-        if(existingCart < 0 ){
-               return res.status(404).json({message:"Item not found"});
+        const existingCart = cart.items.findIndex(item => item.productId.toString() === productId)
+        if (existingCart < 0) {
+            return res.status(404).json({ message: "Item not found" });
         }
-        else{
+        else {
             cart.items[existingCart].quantity = quantity;
         }
 
         //save cart
         await cart.save();
-         return res.status(200).json({message:"Item updated" , cart});
+        return res.status(200).json({ message: "Item updated", cart });
     } catch (error) {
-          console.error("update Item TO cart error:", error);
+        console.error("update Item TO cart error:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+}
+
+export const deleteCart = async (req, res) => {
+    try {
+        ///fetch user
+        const userId = req.user.id;
+
+        //find cart and delete
+        const cart = await cartModel.findOneAndDelete({ user: userId });
+
+        //if cart not found
+        if (!cart) {
+            return res.status(404).json({
+                message: "Cart not found",
+            });
+        }
+
+        return res.status(200).json({
+            message: "Cart deleted successfully",
+            cart,
+        });
+
+
+    } catch (error) {
+        console.error("Delete cart error:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
+    }
+}
+
+export const deleteProductFromCart = async (req, res) => {
+    try {
+        const { productId } = req.params;
+
+        const userId = req.user.id;
+
+        //remove product from cart
+        const cart = await cartModel.findOneAndUpdate(
+            { user: userId, "items.product": productId },
+            {
+                $pull: {
+                    items: {
+                        product: productId
+                    }
+                }
+            },
+            { new: true }
+        )
+
+        if (!cart) {
+            return res.status(404).json({
+                message: "Cart or product not found",
+            });
+        }
+
+        //  If cart empty → delete cart
+        if (cart.items.length === 0) {
+            await cartModel.findOneAndDelete({ user: userId });
+
+            return res.status(200).json({
+                message: "Product removed and cart deleted",
+            });
+        }
+
+
+        return res.status(200).json({
+            message: "Product removed from cart",
+            cart,
+        });
+
+
+
+
+
+    } catch (error) {
+        console.log("delete cart item error :", error);
+
         return res.status(500).json({
             message: "Internal server error",
         });

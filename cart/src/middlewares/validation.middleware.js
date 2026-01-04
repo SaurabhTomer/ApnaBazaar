@@ -49,3 +49,14 @@ export const validateUpdateItemToCart = [
 
   validateResult,
 ];
+
+export const validateDeleteItemToCart = [
+  body("productId")
+    .isString()
+    .withMessage("ProductId must be a string ")
+    .custom(value => mongoose.Types.ObjectId.isValid(value))
+    .withMessage("Invalid productId format"),
+ 
+
+  validateResult,
+];
