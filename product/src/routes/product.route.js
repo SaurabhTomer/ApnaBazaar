@@ -18,19 +18,19 @@ productRouter.post(
 );
 
 //GET
-productRouter.get('/' , createAuthMiddleware(['user']), getProducts)
+productRouter.get('/', createAuthMiddleware(['user']), getProducts)
 
 
 //PATCH
-productRouter.patch('/:id' , createAuthMiddleware(['seller']),updateProduct )
+productRouter.patch('/:id', createAuthMiddleware(['seller']), updateProduct)
 
 //DELETE
-productRouter.delete('/:id' , createAuthMiddleware(['seller']), deleteProduct )
+productRouter.delete('/:id', createAuthMiddleware(['seller']), deleteProduct)
 
 //GET
-productRouter.get('/seller' , createAuthMiddleware(['seller']), getProductsBySeller )
+productRouter.get('/seller', createAuthMiddleware(['seller']), getProductsBySeller)
 
 //GET
-productRouter.get('/:id' , createAuthMiddleware(['user']), getproductById)
+productRouter.get('/:id', createAuthMiddleware(['user']), getproductById)
 
 export default productRouter;
