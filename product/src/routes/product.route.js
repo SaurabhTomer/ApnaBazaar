@@ -30,7 +30,7 @@ productRouter.delete('/:id', createAuthMiddleware(['seller']), deleteProduct)
 //GET
 productRouter.get('/seller', createAuthMiddleware(['seller']), getProductsBySeller)
 
-//GET
+//GET api/products/:id
 productRouter.get('/:id', createAuthMiddleware(['user']), getproductById)
 
 export default productRouter;

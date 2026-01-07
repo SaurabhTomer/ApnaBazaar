@@ -9,7 +9,6 @@ const addressSchema = new mongoose.Schema({
   state: String,
   pincode: String,
   country: String,
-  isDefault:{type:Boolean , default:false}
 });
 
 
@@ -59,7 +58,10 @@ const orderSchema = new mongoose.Schema({
                     enum:[ "USD" , "INR"]
                 }
     },
-    shippingAddress : addressSchema,
+    shippingAddress : {
+        type:addressSchema,
+        required:true
+    },
 
 
 } , {timestamps:true})
