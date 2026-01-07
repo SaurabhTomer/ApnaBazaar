@@ -7,7 +7,7 @@ export const getCart = async (req, res) => {
         const userId = req.user.id;
 
         // find cart of this user
-        const cart = await cartModel.findOne({
+        let cart = await cartModel.findOne({
             user: userId
         });
 
@@ -16,7 +16,14 @@ export const getCart = async (req, res) => {
             cart = new cartModel({ user: userId, items: [] })
             await cart.save();
         }
-        return res.status(200).json({ cart });
+        return res.status(200).json(
+            { 
+            cart,
+            totals:{
+                itemCount:cart.items.length,
+                totalQuantity: cart.items.reduce((sum , item) => sum + item.quantity , 0)
+            }
+         });
 
     } catch (error) {
         console.error("get  cart error:", error);
@@ -82,15 +89,26 @@ export const addItemToCart = async (req, res) => {
 
 export const updateItemToCart = async (req, res) => {
     try {
+
+
+        // console.log("Request headers:", req.headers);  // Check Content-Type
+        // console.log("Request body:", req.body);       // Should show your JSON
+        // console.log("Request cookies:", req.cookies); // Verify token is present
         //id from param
         const { productId } = req.params;
+        // console.log(productId);
+        // console.log(req.cookies);
+        
+        
         //quantity from body
         const { quantity } = req.body;
+        // console.log( "type of quantity" , typeof quantity);
+        
 
         const userId = req.user.id;
 
         //check cart exist not
-        let cart = await cartModel.findById({ user: userId });
+        let cart = await cartModel.findOne({ user: userId });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found" });
         }
@@ -149,44 +167,31 @@ export const deleteProductFromCart = async (req, res) => {
         const { productId } = req.params;
 
         const userId = req.user.id;
-
-        //remove product from cart
+        console.log(productId);
+        
+        // Remove product from cart using $pull to remove the specific item
         const cart = await cartModel.findOneAndUpdate(
-            { user: userId, "items.product": productId },
+            { user: userId },
             {
                 $pull: {
                     items: {
-                        product: productId
+                        productId: productId
                     }
                 }
             },
             { new: true }
         )
-
+        console.log(cart);
         if (!cart) {
             return res.status(404).json({
                 message: "Cart or product not found",
             });
         }
 
-        //  If cart empty → delete cart
-        if (cart.items.length === 0) {
-            await cartModel.findOneAndDelete({ user: userId });
-
-            return res.status(200).json({
-                message: "Product removed and cart deleted",
-            });
-        }
-
-
         return res.status(200).json({
             message: "Product removed from cart",
             cart,
         });
-
-
-
-
 
     } catch (error) {
         console.log("delete cart item error :", error);

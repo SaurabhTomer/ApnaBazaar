@@ -1,5 +1,6 @@
 import {body , validationResult} from 'express-validator'
 import mongoose from 'mongoose';
+import {param } from 'express-validator'
 
 
 
@@ -35,7 +36,7 @@ export const validateAddItemToCart = [
 
 
 export const validateUpdateItemToCart = [
-  body("productId")
+  param("productId")
     .isString()
     .withMessage("ProductId must be a string ")
     .custom(value => mongoose.Types.ObjectId.isValid(value))
@@ -51,7 +52,8 @@ export const validateUpdateItemToCart = [
 ];
 
 export const validateDeleteItemToCart = [
-  body("productId")
+
+  param("productId")
     .isString()
     .withMessage("ProductId must be a string ")
     .custom(value => mongoose.Types.ObjectId.isValid(value))
