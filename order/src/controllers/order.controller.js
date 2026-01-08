@@ -8,6 +8,8 @@ export const createOrder = async (req, res) => {
     const token = req.cookies?.token || req.headers?.authorization?.split(' ')[1];
 
     try {
+
+        
         // fetch user cart from cart service
         const cartResponse = await axios.get(`http://localhost:3002/api/cart`, {
             headers: {
@@ -46,9 +48,9 @@ export const createOrder = async (req, res) => {
             
 
             // //if not in stock , does not allow creation
-            if( !product.stock || product.stock < item.quantity){
-                throw new Error(`Product ${product.title} is out of stock or insufficent`)
-            }
+            // if( !product.stock || product.stock < item.quantity){
+            //     throw new Error(`Product ${product.title} is out of stock or insufficent`)
+            // }
 
             //calculate price of product
             const itemTotal = product.price.amount * item.quantity;
@@ -77,13 +79,15 @@ export const createOrder = async (req, res) => {
                 amount:priceAmount,
                 currency:currency
             },
-            shippingAddress: {
-                street:req.body.shippingAddress.street,
-                city:req.body.shippingAddress.city,
-                state:req.body.shippingAddress.state,
-                pincode:req.body.shippingAddress.pincode,
-                country:req.body.shippingAddress.country,
-            }
+            shippingAddress: 
+                {
+                street: req.body.shippingAddress.street,
+                city: req.body.shippingAddress.city,
+                state: req.body.shippingAddress.state,
+                pincode: req.body.shippingAddress.pincode,
+                country: req.body.shippingAddress.country,
+            },
+            
         })
         
         
@@ -178,7 +182,7 @@ export const  cancelOrderById = async (req, res)=> {
 
 
 export const updateOrderAddress = async (req, res) => {
-    
+
     const userId = req.user.id;
     const orderId = req.params.id;
 
