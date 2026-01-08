@@ -77,7 +77,13 @@ export const createOrder = async (req, res) => {
                 amount:priceAmount,
                 currency:currency
             },
-            shippingAddress: req.body.shippingAddress
+            shippingAddress: {
+                street:req.body.shippingAddress.street,
+                city:req.body.shippingAddress.city,
+                state:req.body.shippingAddress.state,
+                pincode:req.body.shippingAddress.pincode,
+                country:req.body.shippingAddress.country,
+            }
         })
         
         
@@ -87,5 +93,51 @@ export const createOrder = async (req, res) => {
         console.log('create order error', error);
         return res.status(500).json({ message: "Internal server error" })
 
+    }
+}
+
+export const getMyOrders = async(req , res) => {
+  const user = req.user;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    try {
+        const orders = await orderModel.find({ user: user.id }).skip(skip).limit(limit).exec();
+        const totalOrders = await orderModel.countDocuments({ user: user.id });
+
+        res.status(200).json({
+            orders,
+            meta: {
+                total: totalOrders,
+                page,
+                limit
+            }
+        })
+    } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message })
+    }
+}
+
+export const  getOrderById = async (req, res) =>  {
+
+    const userId = req.user;
+    const orderId = req.params.id;
+
+    try {
+        const order = await orderModel.findById(orderId)
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        if (order.user.toString() !== userId) {
+            return res.status(403).json({ message: "Forbidden: You do not have access to this order" });
+        }
+
+        res.status(200).json({ order })
+    } catch (err) {
+        res.status(500).json({ message: "Internal server error", error: err.message })
     }
 }
