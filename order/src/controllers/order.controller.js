@@ -70,7 +70,7 @@ export const createOrder = async (req, res) => {
         // console.log(orderItems);
         // console.log(currency);
         
-
+        //create order
         const order = await orderModel.create({
             user:userId,
             items:orderItems,
