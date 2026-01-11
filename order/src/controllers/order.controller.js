@@ -79,7 +79,7 @@ export const createOrder = async (req, res) => {
                 amount:priceAmount,
                 currency:currency
             },
-            shippingAddress:        // address recieed from body
+            shippingAddress:        // address recieved from body
                 {
                 street: req.body.shippingAddress.street,
                 city: req.body.shippingAddress.city,
