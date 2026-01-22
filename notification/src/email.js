@@ -10,12 +10,11 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // App Password ONLY
+    pass: process.env.EMAIL_PASS, 
   },
 });
 
-// ⚠️ Comment this if you still see errors
-// transporter.verify();
+
 
 export const sendEmail = async (to, subject, text, html) => {
   try {
