@@ -25,6 +25,7 @@ export const createProduct = async (req, res) => {
       )
     );
 
+    //product creation
     const product = await productModel.create({
       title,
       description,
