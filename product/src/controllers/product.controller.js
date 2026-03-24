@@ -19,6 +19,7 @@ export const createProduct = async (req, res) => {
     };
 
     // Upload product images to ImageKit and collect their URLs
+    // Upload product images to ImageKit and collect their URLs
     const images = await Promise.all(
       (req.files || []).map(file =>
         uploadImage({ buffer: file.buffer })
